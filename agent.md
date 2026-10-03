@@ -41,3 +41,13 @@
 - Instructions concises, à l'impératif
 - Une section par sujet
 - Pas de remplissage
+
+## Versions
+- La version est dans package.json et dans src-tauri/tauri.conf.json. Les garder identiques.
+- Pour publier : modifier la version, committer, créer le tag vX.Y.Z, pousser le tag.
+- La CI tourne à chaque push et à chaque pull request. Une release n'est créée que sur un tag.
+
+## Releases
+- Un tag de version, par exemple v1.0.0, lance le workflow de release.
+- tauri-action construit l'application pour Windows, macOS et Linux.
+- Les installeurs sont attachés à une GitHub Release, pour téléchargement et mise à jour.

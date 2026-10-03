@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "wiki",
+  "version": "0.1.0",
+  "identifier": "fr.elouan.wiki",
+  "build": {
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "wiki",
+        "width": 1000,
+        "height": 700
+      }
+    ]
+  },
+  "bundle": {
+    "active": true
+  }
+}
