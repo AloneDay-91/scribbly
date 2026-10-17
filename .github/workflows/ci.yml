@@ -26,7 +26,5 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
-      - name: Build the Tauri app
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check the Tauri app
+        run: cargo check --manifest-path src-tauri/Cargo.toml

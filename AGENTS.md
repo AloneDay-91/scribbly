@@ -1,9 +1,9 @@
-# Projet : wiki Markdown local (Tauri)
+# Projet : Scribbly
 
 ## Stack
 - Tauri 2 (backend Rust, webview du système)
 - React + TypeScript (interface)
-- shadcn/ui (composants copiés dans le projet)
+- Lumen UI (composants copiés dans le projet, ui.elouanb.fr)
 - Fichiers Markdown sur disque comme stockage (pas de base de données)
 - 100 % local, aucun serveur
 

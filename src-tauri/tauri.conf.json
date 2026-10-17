@@ -1,21 +1,70 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "wiki",
-  "version": "0.1.0",
-  "identifier": "fr.elouan.wiki",
+  "productName": "Scribbly",
+  "version": "0.2.0",
+  "identifier": "com.scribbly.app",
   "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "wiki",
-        "width": 1000,
-        "height": 700
+        "label": "main",
+        "title": "Scribbly",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 900,
+        "minHeight": 600,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "acceptFirstMouse": true,
+        "trafficLightPosition": {
+          "x": 16,
+          "y": 16
+        }
       }
-    ]
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "allow": [
+            "$DOCUMENT/app web/scribbly/notes/**",
+            "$DOCUMENT/App web/scribbly/notes/**",
+            "$DOCUMENT/app web/scribbly/workspaces/**",
+            "$DOCUMENT/App web/scribbly/workspaces/**"
+          ],
+          "requireLiteralLeadingDot": false
+        }
+      }
+    }
   },
   "bundle": {
-    "active": true
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY4REVDQzE1QTNGNDBENzEKUldSeERmU2pGY3plYUtGT3E5VWx1TUVVbGV2OXMyL0RrT1FzRkFCZGlJRThYWkZhTkhkeE92azMK",
+      "endpoints": [
+        "https://github.com/AloneDay-91/scribbly/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      },
+      "requireSignedVersion": true
+    }
   }
 }

@@ -1,0 +1,30 @@
+"use client"
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button"
+
+import { cn } from "@/lib/utils"
+import {
+  buttonVariants,
+  type ButtonVariantProps,
+} from "@/components/ui/button-variants"
+
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  nativeButton,
+  render,
+  ...props
+}: ButtonPrimitive.Props & ButtonVariantProps) {
+  return (
+    <ButtonPrimitive
+      data-slot="button"
+      render={render}
+      nativeButton={nativeButton ?? !render}
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    />
+  )
+}
+
+export { Button }

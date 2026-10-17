@@ -1,0 +1,453 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-new: var(--new);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Families loaded by @fontsource; the preset refers to them by these names. */
+:root {
+  --font-inter: "Inter Variable";
+  --font-jetbrains: "JetBrains Mono Variable";
+}
+
+/* lumen-preset:start */
+@theme inline {
+  --font-sans: var(--font-inter, ui-sans-serif), system-ui, sans-serif;
+  --font-heading: var(--font-inter, ui-sans-serif), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains, ui-monospace), monospace;
+  --shadow-sm: 0 1px 4px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 3px 12px rgb(0 0 0 / 0.07);
+}
+
+:root {
+  --background: #fcfbf8;
+  --foreground: #1c1c1c;
+  --card: #fcfbf8;
+  --card-foreground: #1c1c1c;
+  --primary: #7777e2;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #262626;
+  --muted: #f5f5f5;
+  --muted-foreground: #696969;
+  --destructive: #dc3d43;
+  --border: #e4e0da;
+  --ring: #a3a3a3;
+  --radius: 0.15rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --font-sans: var(--font-inter, ui-sans-serif), system-ui, sans-serif;
+  --font-heading: var(--font-inter, ui-sans-serif), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains, ui-monospace), monospace;
+  --shadow-sm: 0 1px 4px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 3px 12px rgb(0 0 0 / 0.07);
+}
+
+.dark {
+  --background: #111111;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --primary: #e8e8e8;
+  --primary-foreground: #262626;
+  --secondary: #333333;
+  --secondary-foreground: #fafafa;
+  --muted: #333333;
+  --muted-foreground: #a3a3a3;
+  --destructive: #e5484d;
+  --border: #2e2e2e;
+  --ring: #737373;
+}
+
+html {
+  font-size: 16px;
+}
+/* lumen-preset:end */
+
+/* The kit draws every sidebar row as a pill. A note's context-menu trigger
+   replaces data-slot, so the active note must be matched by its menu class. */
+[data-slot="sidebar-menu-button"],
+[data-slot="sidebar-menu-sub-button"],
+[data-slot="sidebar-inner"] [class~="peer/menu-button"] {
+  border-radius: var(--radius-4xl);
+}
+
+/* Tokens the interface already uses, derived from the preset. */
+:root {
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --input: var(--border);
+  --brand: #7777e2;
+  --brand-foreground: #fff;
+  --brand-subtle: color-mix(in srgb, var(--brand) 14%, var(--background));
+  --new: var(--brand);
+
+  --sidebar: #f4f2ed;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-foreground);
+  --sidebar-accent: #eceae4;
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+.dark {
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --input: var(--border);
+
+  --sidebar: #0c0c0c;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-foreground);
+  --sidebar-accent: #242424;
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-background text-sm text-foreground;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--brand) 25%, transparent);
+  }
+}
+
+/* The design-system Typography scale lives in the components layer, which is
+   ordered before Tailwind's base reset. The reset flattens h1–h6, so the
+   heading sizes are restated here for note content only. */
+[data-slot="typography"] :where(h1, h2, h3, h4, h5, h6):not(:where(.not-typography, .not-typography *)) {
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+[data-slot="typography"] :where(h1):not(:where(.not-typography, .not-typography *)) {
+  font-size: 1.75em;
+}
+
+[data-slot="typography"] :where(h2):not(:where(.not-typography, .not-typography *)) {
+  font-size: 1.4em;
+}
+
+[data-slot="typography"] :where(h3):not(:where(.not-typography, .not-typography *)) {
+  font-size: 1.15em;
+}
+
+[data-slot="typography"] :where(h4):not(:where(.not-typography, .not-typography *)) {
+  font-size: 1em;
+}
+
+[data-slot="typography"] :where(h5):not(:where(.not-typography, .not-typography *)) {
+  font-size: 0.95em;
+}
+
+[data-slot="typography"] :where(h6):not(:where(.not-typography, .not-typography *)) {
+  font-size: 0.85em;
+}
+
+/* Images, highlights, and wiki links rendered as buttons. */
+.note button {
+  color: var(--foreground);
+  text-decoration-line: underline;
+  text-underline-offset: 0.25rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.note img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.note mark {
+  border-radius: 0.2em;
+  background: color-mix(in oklch, var(--brand) 28%, transparent);
+  color: inherit;
+}
+
+.note sub,
+.note sup {
+  font-size: 0.75em;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: oklch(0.55 0.2 300);
+}
+.hljs-string,
+.hljs-attr,
+.hljs-template-tag {
+  color: oklch(0.55 0.14 150);
+}
+.hljs-number,
+.hljs-literal,
+.hljs-variable {
+  color: oklch(0.6 0.16 50);
+}
+.hljs-title,
+.hljs-section,
+.hljs-function {
+  color: oklch(0.55 0.15 250);
+}
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-built_in {
+  color: oklch(0.75 0.15 300);
+}
+.dark .hljs-string,
+.dark .hljs-attr,
+.dark .hljs-template-tag {
+  color: oklch(0.78 0.13 150);
+}
+.dark .hljs-number,
+.dark .hljs-literal,
+.dark .hljs-variable {
+  color: oklch(0.8 0.13 60);
+}
+.dark .hljs-title,
+.dark .hljs-section,
+.dark .hljs-function {
+  color: oklch(0.78 0.12 250);
+}
+
+.visual-editor .ProseMirror {
+  text-align: left;
+}
+
+.visual-editor .ProseMirror li > p {
+  margin: 0.1em 0;
+}
+
+.visual-editor .ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--muted-foreground);
+}
+
+.visual-editor .slash-query {
+  border-radius: 0.25rem;
+  background: var(--muted);
+}
+
+.block-node {
+  position: relative;
+}
+
+.block-node-controls {
+  position: absolute;
+  top: 0.2em;
+  left: -3.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  opacity: 0;
+  user-select: none;
+}
+
+.block-node:hover > .block-node-controls,
+.block-node:focus-within > .block-node-controls {
+  opacity: 1;
+}
+
+.notion-block-button {
+  display: flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  color: var(--muted-foreground);
+  -webkit-user-drag: none;
+}
+
+.notion-block-button:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.notion-block-grip,
+.notion-block-grip * {
+  cursor: grab;
+  -webkit-user-drag: none;
+}
+
+body.is-block-dragging,
+body.is-block-dragging *,
+body.is-note-dragging,
+body.is-note-dragging * {
+  cursor: grabbing;
+  user-select: none;
+}
+
+[data-drop-line="before"] {
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+[data-drop-line="after"] {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+.notion-block-grip * {
+  pointer-events: none;
+}
+
+.notion-block-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.visual-editor .ProseMirror ul[data-type="taskList"],
+.visual-editor .node-taskList [data-node-view-content-react] {
+  list-style: none;
+  padding-left: 0.15em;
+}
+
+.visual-editor .ProseMirror ul[data-type="taskList"] li,
+.visual-editor .node-taskList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.visual-editor .ProseMirror ul[data-type="taskList"] li > label,
+.visual-editor .node-taskList li > label {
+  margin-top: 0.35em;
+}
+
+.visual-editor .ProseMirror ul[data-type="taskList"] input[type="checkbox"],
+.visual-editor .node-taskList input[type="checkbox"] {
+  accent-color: var(--brand);
+}
+
+.visual-editor .ProseMirror .tableWrapper {
+  margin: 0.6em 0;
+  overflow-x: auto;
+}
+
+.visual-editor .ProseMirror-selectednode {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.visual-editor .ProseMirror:focus-visible {
+  outline: none;
+}
+
+.scribbly-drop-line {
+  position: fixed;
+  z-index: 80;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 45%, transparent);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.scribbly-drop-line.is-visible {
+  opacity: 1;
+}
+
+.scribbly-drop-line::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 55%, transparent);
+  transform: translateY(-50%);
+}
