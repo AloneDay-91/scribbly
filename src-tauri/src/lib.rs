@@ -100,19 +100,48 @@ struct WorkspaceInfo {
     image: String,
 }
 
+/// Checkout folder when this binary was built on a machine where the repo is still present.
+/// A GitHub build embeds `/Users/runner/work/...`, which does not exist after installation.
+fn project_folder(name: &str) -> Option<PathBuf> {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join(name);
+    path.parent()?.is_dir().then_some(path)
+}
+
+fn data_dir() -> Result<PathBuf, String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .map_err(|_| "dossier personnel introuvable".to_string())?;
+    let dir = if cfg!(target_os = "macos") {
+        PathBuf::from(home).join("Library/Application Support/Scribbly")
+    } else if cfg!(target_os = "windows") {
+        std::env::var("APPDATA")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from(home).join("AppData/Roaming"))
+            .join("Scribbly")
+    } else {
+        PathBuf::from(home).join(".local/share/scribbly")
+    };
+    fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
+    dir.canonicalize().map_err(|err| err.to_string())
+}
+
 fn default_notes_root() -> Result<PathBuf, String> {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../notes");
-    if !root.is_dir() {
-        return Err(format!(
-            "notes directory not found at {}",
-            root.display()
-        ));
-    }
+    let root = match project_folder("notes") {
+        Some(path) if path.is_dir() => path,
+        _ => {
+            let path = data_dir()?.join("notes");
+            fs::create_dir_all(&path).map_err(|err| err.to_string())?;
+            path
+        }
+    };
     root.canonicalize().map_err(|err| err.to_string())
 }
 
 fn workspaces_dir() -> Result<PathBuf, String> {
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../workspaces");
+    let dir = match project_folder("workspaces") {
+        Some(path) => path,
+        None => data_dir()?.join("workspaces"),
+    };
     fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
     dir.canonicalize().map_err(|err| err.to_string())
 }
@@ -1252,4 +1281,15 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::project_folder;
+
+    #[test]
+    fn project_folder_sees_this_checkout() {
+        let notes = project_folder("notes").expect("repo root");
+        assert!(notes.ends_with("notes"));
+    }
 }

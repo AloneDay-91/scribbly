@@ -1,6 +1,6 @@
 [package]
 name = "scribbly"
-version = "0.2.3"
+version = "0.2.4"
 description = "Scribbly, local Markdown notes"
 authors = ["elouan"]
 edition = "2021"
