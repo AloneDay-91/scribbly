@@ -1174,10 +1174,22 @@ fn delete_note(path: String) -> Result<(), String> {
 
 #[tauri::command]
 fn dismiss_splash(app: tauri::AppHandle) {
-    if let Some(main) = app.get_webview_window("main") {
-        let _ = main.show();
-        let _ = main.set_focus();
+    let Some(main) = app.get_webview_window("main") else {
+        return;
+    };
+    // A borderless window that has never been shown stays invisible on Windows.
+    #[cfg(not(target_os = "macos"))]
+    let _ = main.set_decorations(false);
+    if main.show().is_err() {
+        return;
     }
+    let _ = main.unminimize();
+    #[cfg(target_os = "windows")]
+    if let Ok(size) = main.inner_size() {
+        let _ = main.set_size(tauri::PhysicalSize::new(size.width.saturating_add(1), size.height));
+        let _ = main.set_size(size);
+    }
+    let _ = main.set_focus();
     if let Some(splash) = app.get_webview_window("splashscreen") {
         let _ = splash.close();
     }
@@ -1193,11 +1205,21 @@ pub fn run() {
         .setup(|app| {
             let root = notes_root().map_err(std::io::Error::other)?;
             app.fs_scope().allow_directory(&root, true)?;
-            // macOS keeps the overlay title bar (native traffic lights). Other platforms
-            // drop the system chrome so the in-app title bar can host tabs and window controls.
-            #[cfg(not(target_os = "macos"))]
+            // macOS keeps the overlay title bar (native traffic lights). Linux drops the
+            // system chrome immediately. Windows must be shown first: WebView2 does not
+            // start while the window is hidden, and removing the frame before that first
+            // show leaves the window invisible after the splash closes.
+            #[cfg(target_os = "linux")]
             if let Some(window) = app.get_webview_window("main") {
                 window.set_decorations(false).map_err(std::io::Error::other)?;
+            }
+            #[cfg(target_os = "windows")]
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.show();
+                if let Some(splash) = app.get_webview_window("splashscreen") {
+                    let _ = splash.set_always_on_top(true);
+                    let _ = splash.set_focus();
+                }
             }
             Ok(())
         })
