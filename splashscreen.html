@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scribbly</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --background: #fcfbf8;
+        --foreground: #1c1c1c;
+        --muted: #696969;
+        --track: #e4e0da;
+        --bar: #1c1c1c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background: #111111;
+          --foreground: #fafafa;
+          --muted: #a3a3a3;
+          --track: #2e2e2e;
+          --bar: #fafafa;
+        }
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: ui-sans-serif, system-ui, sans-serif;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      img {
+        width: 56px;
+        height: 56px;
+      }
+      p {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+      .track {
+        width: 96px;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--track);
+      }
+      .track span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--bar);
+        animation: slide 1s ease-in-out infinite;
+      }
+      @keyframes slide {
+        0% {
+          transform: translateX(-120%);
+        }
+        100% {
+          transform: translateX(280%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icon.svg" alt="" />
+      <p>Scribbly</p>
+      <div class="track" aria-hidden="true"><span></span></div>
+    </main>
+  </body>
+</html>

@@ -75,7 +75,7 @@ import {
 } from "@/lib/notes";
 import { isMac, isTauri, modKey } from "@/lib/platform";
 import { findUpdate } from "@/lib/updates";
-import { loadPrefs, savePrefs, type Prefs } from "@/lib/prefs";
+import { defaultPrefs, loadPrefs, savePrefs, type Prefs } from "@/lib/prefs";
 import {
   applyOpen,
   blankSession,
@@ -91,6 +91,8 @@ import {
   type OpenMode,
   type Tab,
 } from "@/lib/tabs";
+import { Onboarding, type OnboardingResult } from "@/components/onboarding";
+import { SplashScreen } from "@/components/splash-screen";
 import { SettingsView, settingsPageLabel, type SettingsPage } from "@/components/settings-view";
 import { WorkspaceDialog, type WorkspaceDraft } from "@/components/workspace-dialog";
 import type { Workspace } from "@/lib/workspaces";
@@ -139,6 +141,7 @@ function App() {
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [settingsPage, setSettingsPage] = useState<SettingsPage | null>(null);
+  const [showSplash, setShowSplash] = useState(() => !isTauri());
   const [availableUpdate, setAvailableUpdate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -170,6 +173,16 @@ function App() {
   useEffect(() => {
     savePrefs(prefs);
   }, [prefs]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setShowSplash(false);
+      if (isTauri()) {
+        void invoke("dismiss_splash").catch(() => undefined);
+      }
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!isTauri()) {
@@ -508,8 +521,41 @@ function App() {
     [commitNav],
   );
 
+  const finishOnboarding = useCallback((result: OnboardingResult) => {
+    const session = blankSession(null);
+    const next: Prefs = {
+      ...defaultPrefs,
+      ready: true,
+      tabs: session.tabs,
+      activeTab: session.activeId,
+      lastNote: null,
+      recent: [],
+      accounts: [result.account],
+      activeAccountId: result.account.id,
+      activeWorkspace: result.workspace.path || null,
+    };
+    savePrefs(next);
+    setTabs(session.tabs);
+    setActiveId(session.activeId);
+    setNotes([]);
+    setFolders([]);
+    setTrash([]);
+    setSidebarOrder({});
+    setCurrent(null);
+    setDraft("");
+    setSaved("");
+    setShowTrash(false);
+    setShowMedia(false);
+    setSettingsPage(null);
+    setWorkspaces([result.workspace]);
+    setPrefs(next);
+  }, []);
+
   // Initial load: open the saved workspace, then restore tabs that still exist.
   useEffect(() => {
+    if (!prefs.ready) {
+      return;
+    }
     let cancelled = false;
     const boot = async () => {
       let listed: Workspace[] = [];
@@ -563,7 +609,7 @@ function App() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prefs.ready]);
 
   // Autosave after a pause in typing.
   useEffect(() => {
@@ -1151,6 +1197,14 @@ function App() {
       .setTitle(currentNote?.title ?? "Scribbly")
       .catch(() => undefined);
   }, [currentNote]);
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
+  if (!prefs.ready) {
+    return <Onboarding onComplete={finishOnboarding} />;
+  }
 
   return (
     <SidebarProvider className="h-svh flex-col">

@@ -5,7 +5,6 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::Serialize;
-#[cfg(not(target_os = "macos"))]
 use tauri::Manager;
 use tauri_plugin_fs::FsExt;
 
@@ -1173,6 +1172,17 @@ fn delete_note(path: String) -> Result<(), String> {
     fs::rename(&full, &target).map_err(|err| err.to_string())
 }
 
+#[tauri::command]
+fn dismiss_splash(app: tauri::AppHandle) {
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.set_focus();
+    }
+    if let Some(splash) = app.get_webview_window("splashscreen") {
+        let _ = splash.close();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1192,6 +1202,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            dismiss_splash,
             list_notes,
             list_media,
             rename_media,

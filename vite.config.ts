@@ -5,7 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const host = process.env.TAURI_DEV_HOST;
-const srcDir = path.resolve(fileURLToPath(new URL(".", import.meta.url)), "src");
+const rootDir = fileURLToPath(new URL(".", import.meta.url));
+const srcDir = path.resolve(rootDir, "src");
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
@@ -16,6 +17,14 @@ export default defineConfig(() => ({
     },
   },
   clearScreen: false,
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(rootDir, "index.html"),
+        splashscreen: path.resolve(rootDir, "splashscreen.html"),
+      },
+    },
+  },
   server: {
     port: 1420,
     strictPort: true,

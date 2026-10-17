@@ -12,6 +12,15 @@ body,
   margin: 0;
 }
 
+@keyframes splash-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

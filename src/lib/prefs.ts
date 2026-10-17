@@ -16,6 +16,8 @@ export type Prefs = {
   activeWorkspace: string | null;
   accounts: Account[];
   activeAccountId: string | null;
+  /** False until the first-launch configuration has been completed. */
+  ready: boolean;
 };
 
 const KEY = "scribbly:prefs";
@@ -32,6 +34,7 @@ export const defaultPrefs: Prefs = {
   activeWorkspace: null,
   accounts: [],
   activeAccountId: null,
+  ready: false,
 };
 
 function parseAccount(value: unknown): Account | null {
@@ -95,6 +98,7 @@ export function loadPrefs(): Prefs {
       activeWorkspace: typeof raw.activeWorkspace === "string" ? raw.activeWorkspace : null,
       accounts: accounts.accounts,
       activeAccountId: accounts.activeAccountId,
+      ready: raw.ready === true,
     };
   } catch {
     return defaultPrefs;
