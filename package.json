@@ -3,12 +3,17 @@
   "private": true,
   "version": "0.2.1",
   "type": "module",
+  "workspaces": [
+    "apps/site"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit --pretty false && tsc --noEmit --pretty false -p tsconfig.node.json",
-    "tauri": "tauri"
+    "typecheck": "tsc --noEmit --pretty false && tsc --noEmit --pretty false -p tsconfig.node.json && npm run typecheck -w @scribbly/site",
+    "tauri": "tauri",
+    "dev:site": "npm run dev -w @scribbly/site",
+    "build:site": "npm run build -w @scribbly/site"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
