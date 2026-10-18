@@ -126,6 +126,7 @@ function App() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspaceDialogOpen, setWorkspaceDialogOpen] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
+  const [deletingWorkspace, setDeletingWorkspace] = useState<Workspace | null>(null);
   const [workspaceBusy, setWorkspaceBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [opening, setOpening] = useState(false);
@@ -508,6 +509,41 @@ function App() {
     }
   }, [editingWorkspace]);
 
+  const removeWorkspace = useCallback(
+    async (workspace: Workspace) => {
+      if (workspace.kind === "default") {
+        return false;
+      }
+      setWorkspaceBusy(true);
+      try {
+        const wasActive = workspace.path === prefs.activeWorkspace;
+        if (wasActive && !(await flush())) {
+          return false;
+        }
+        await invoke("delete_workspace", { path: workspace.path });
+        const listed = await invoke<Workspace[]>("list_workspaces");
+        setWorkspaces(listed);
+        if (wasActive) {
+          const next = listed.find((item) => item.kind === "default") ?? listed.find((item) => item.path);
+          if (next?.path) {
+            await switchWorkspace(next.path);
+          }
+        }
+        toast.add({
+          title: `« ${workspace.name} » supprimé`,
+          description: "Les notes de cet environnement ont été effacées.",
+        });
+        return true;
+      } catch (err: unknown) {
+        reportError("Impossible de supprimer l'environnement", err);
+        return false;
+      } finally {
+        setWorkspaceBusy(false);
+      }
+    },
+    [flush, prefs.activeWorkspace, switchWorkspace, toast],
+  );
+
   const cycleTab = useCallback(
     async (delta: number) => {
       const list = tabsRef.current;
@@ -568,7 +604,7 @@ function App() {
         return;
       }
       if (listed.length === 0) {
-        listed = [{ name: "Notes", path: "", icon: "logo", image: "" }];
+        listed = [{ name: "Notes", path: "", icon: "logo", image: "", kind: "default" }];
       }
       setWorkspaces(listed);
       const saved = loadPrefs().activeWorkspace;
@@ -1266,6 +1302,7 @@ function App() {
         onWorkspaceChange={(path) => void switchWorkspace(path)}
         onCreateWorkspace={() => setWorkspaceDialogOpen(true)}
         onCustomizeWorkspace={setEditingWorkspace}
+        onDeleteWorkspace={setDeletingWorkspace}
         accounts={prefs.accounts}
         activeAccountId={prefs.activeAccountId}
         onSelectAccount={(id) => updatePrefs({ activeAccountId: id })}
@@ -1479,6 +1516,44 @@ function App() {
         }}
         onSave={(draft) => void saveWorkspace(draft)}
       />
+      <AlertDialog
+        open={deletingWorkspace !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingWorkspace(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer « {deletingWorkspace?.name} » ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              L'environnement et ses notes sont effacés. Cette action est définitive.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose render={<Button variant="outline" />}>Annuler</AlertDialogClose>
+            <Button
+              variant="destructive"
+              disabled={workspaceBusy}
+              onClick={() => {
+                const workspace = deletingWorkspace;
+                if (!workspace) {
+                  return;
+                }
+                void removeWorkspace(workspace).then((ok) => {
+                  if (ok) {
+                    setDeletingWorkspace(null);
+                  }
+                });
+              }}
+            >
+              {workspaceBusy ? <Spinner data-icon="inline-start" /> : null}
+              Supprimer
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <TextPromptDialog
         open={folderDialogOpen}
         onOpenChange={setFolderDialogOpen}

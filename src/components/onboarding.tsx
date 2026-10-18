@@ -56,7 +56,8 @@ export function Onboarding({ onComplete }: { onComplete: (result: OnboardingResu
   const [step, setStep] = useState<Step>("welcome");
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [workspaceName, setWorkspaceName] = useState("Notes");
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceTouched, setWorkspaceTouched] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -77,11 +78,25 @@ export function Onboarding({ onComplete }: { onComplete: (result: OnboardingResu
     setBusy(true);
     setError(null);
     const create = isTauri()
-      ? invoke<Workspace>("create_workspace", { name: display }).then(async (workspace) => {
+      ? invoke<Workspace[]>("list_workspaces").then(async (listed) => {
+          const existing = listed.find((item) => item.kind === "default") ?? listed[0];
+          if (!existing?.path) {
+            const workspace = await invoke<Workspace>("create_workspace", { name: display });
+            await invoke("set_workspace", { path: workspace.path });
+            return workspace;
+          }
+          const workspace = await invoke<Workspace>("update_workspace", {
+            path: existing.path,
+            name: display,
+            icon: existing.icon,
+            image: null,
+            imageExt: null,
+            clearImage: false,
+          });
           await invoke("set_workspace", { path: workspace.path });
           return workspace;
         })
-      : Promise.resolve<Workspace>({ name: display, path: "", icon: "logo", image: "" });
+      : Promise.resolve<Workspace>({ name: display, path: "", icon: "logo", image: "", kind: "default" });
     create
       .then((workspace) => onComplete({ account, workspace }))
       .catch((err: unknown) => {
@@ -114,7 +129,10 @@ export function Onboarding({ onComplete }: { onComplete: (result: OnboardingResu
           onNameChange={setName}
           onAvatarChange={setAvatar}
           onImageError={setImageError}
-          onWorkspaceNameChange={setWorkspaceName}
+          onWorkspaceNameChange={(value) => {
+            setWorkspaceTouched(true);
+            setWorkspaceName(value);
+          }}
           onThemeChange={setTheme}
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -132,6 +150,9 @@ export function Onboarding({ onComplete }: { onComplete: (result: OnboardingResu
               if (step === "appearance") {
                 finish();
                 return;
+              }
+              if (step === "account" && !workspaceTouched) {
+                setWorkspaceName(workspaceLabel(name));
               }
               go(next(step));
             }}
@@ -177,6 +198,10 @@ function next(step: Step): Step {
       return exhaustive;
     }
   }
+}
+
+function workspaceLabel(name: string) {
+  return `Environnement de travail de ${name.trim()}`;
 }
 
 function canContinue(step: Step, name: string, workspaceName: string) {
@@ -290,7 +315,7 @@ function StepBody({
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-medium tracking-tight">Premier environnement</h1>
             <p className="text-sm text-muted-foreground">
-              Un dossier vide pour ce wiki. Vous pourrez en créer d'autres ensuite.
+              Le nom de votre environnement. Vous pourrez en créer d'autres ensuite.
             </p>
           </div>
           <Field>

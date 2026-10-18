@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   Dialog,
@@ -80,6 +81,12 @@ export function WorkspaceDialog({ workspace, busy, onOpenChange, onSave }: Works
           <FieldLabel>Nom</FieldLabel>
           <FieldControl value={name} autoFocus onChange={(event) => setName(event.target.value)} />
         </Field>
+        {workspace?.kind === "default" ? (
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">Par défaut</Badge>
+            <p className="text-xs text-muted-foreground">Cet environnement ne peut pas être supprimé.</p>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium">Icône</span>
           <ToggleGroup

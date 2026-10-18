@@ -155,6 +155,7 @@ type AppSidebarProps = NoteActions & {
   onWorkspaceChange: (path: string) => void;
   onCreateWorkspace: () => void;
   onCustomizeWorkspace: (workspace: Workspace) => void;
+  onDeleteWorkspace: (workspace: Workspace) => void;
   accounts: Account[];
   activeAccountId: string | null;
   onSelectAccount: (id: string) => void;
@@ -187,6 +188,7 @@ export function AppSidebar({
   onWorkspaceChange,
   onCreateWorkspace,
   onCustomizeWorkspace,
+  onDeleteWorkspace,
   accounts,
   activeAccountId,
   onSelectAccount,
@@ -358,6 +360,7 @@ export function AppSidebar({
             onWorkspaceChange={onWorkspaceChange}
             onCreateWorkspace={onCreateWorkspace}
             onCustomizeWorkspace={onCustomizeWorkspace}
+            onDeleteWorkspace={onDeleteWorkspace}
           />
         )}
       </SidebarHeader>

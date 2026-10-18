@@ -76,4 +76,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-        run: gh release edit "${{ github.ref_name }}" --draft=false --latest --repo "${{ github.repository }}"
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          notes="$(awk -v version="$version" '
+            $0 == "## " version { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md)"
+          if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+            echo "CHANGELOG.md n'a pas de section $version"
+            exit 1
+          fi
+          {
+            echo "Installeurs pour macOS (Apple silicon et Intel), Windows, Debian (.deb) et Fedora (.rpm)."
+            echo "L'AppImage sert à la mise à jour intégrée sous Linux."
+            echo
+            echo "Nouveautés"
+            printf '%s\n' "$notes"
+          } > release-notes.md
+          gh release edit "${GITHUB_REF_NAME}" --draft=false --latest --notes-file release-notes.md --repo "${{ github.repository }}"

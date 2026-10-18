@@ -82,6 +82,10 @@ fn default_workspace_icon() -> String {
     "logo".to_string()
 }
 
+fn default_workspace_kind() -> String {
+    "custom".to_string()
+}
+
 #[derive(Serialize, serde::Deserialize)]
 struct WorkspaceMeta {
     name: String,
@@ -89,6 +93,9 @@ struct WorkspaceMeta {
     icon: String,
     #[serde(default)]
     image: String,
+    /// `default` for the original environment, `custom` for the others.
+    #[serde(default = "default_workspace_kind")]
+    kind: String,
 }
 
 #[derive(Serialize)]
@@ -98,6 +105,8 @@ struct WorkspaceInfo {
     icon: String,
     /// Absolute path of a custom image, or empty when the environment uses an icon.
     image: String,
+    /// `default` for the original environment, `custom` for the others.
+    kind: String,
 }
 
 /// Checkout folder when this binary was built on a machine where the repo is still present.
@@ -167,6 +176,19 @@ fn read_workspace_meta(dir: &Path, fallback: &str) -> WorkspaceMeta {
         name: fallback.to_string(),
         icon: default_workspace_icon(),
         image: String::new(),
+        kind: default_workspace_kind(),
+    }
+}
+
+fn is_default_workspace(dir: &Path) -> bool {
+    default_notes_root().ok().as_deref() == Some(dir)
+}
+
+fn workspace_kind(dir: &Path) -> String {
+    if is_default_workspace(dir) {
+        "default".to_string()
+    } else {
+        "custom".to_string()
     }
 }
 
@@ -241,6 +263,7 @@ fn workspace_info(dir: &Path, fallback: &str) -> WorkspaceInfo {
         path: dir.to_string_lossy().into_owned(),
         icon: meta.icon,
         image,
+        kind: workspace_kind(dir),
     }
 }
 
@@ -293,6 +316,7 @@ fn create_workspace(name: String) -> Result<WorkspaceInfo, String> {
             name: display.to_string(),
             icon: default_workspace_icon(),
             image: String::new(),
+            kind: "custom".to_string(),
         },
     ) {
         let _ = fs::remove_dir(&dir);
@@ -327,6 +351,7 @@ fn update_workspace(
     let mut meta = read_workspace_meta(&dir, display);
     meta.name = display.to_string();
     meta.icon = icon.to_string();
+    meta.kind = workspace_kind(&dir);
 
     let store = dir.join(".scribbly");
     if let Some(bytes) = image {
@@ -346,6 +371,20 @@ fn update_workspace(
 
     write_workspace_meta(&dir, &meta)?;
     Ok(workspace_info(&dir, display))
+}
+
+#[tauri::command]
+fn delete_workspace(path: String) -> Result<(), String> {
+    let dir = resolve_workspace(&path)?;
+    if is_default_workspace(&dir) {
+        return Err("l'environnement par défaut ne peut pas être supprimé".into());
+    }
+    fs::remove_dir_all(&dir).map_err(|err| err.to_string())?;
+    let mut active = ACTIVE_ROOT.lock().map_err(|err| err.to_string())?;
+    if active.as_ref() == Some(&dir) {
+        *active = None;
+    }
+    Ok(())
 }
 
 fn clear_workspace_images(store: &Path) -> Result<(), String> {
@@ -1206,9 +1245,6 @@ fn dismiss_splash(app: tauri::AppHandle) {
     let Some(main) = app.get_webview_window("main") else {
         return;
     };
-    // A borderless window that has never been shown stays invisible on Windows.
-    #[cfg(not(target_os = "macos"))]
-    let _ = main.set_decorations(false);
     if main.show().is_err() {
         return;
     }
@@ -1234,14 +1270,9 @@ pub fn run() {
         .setup(|app| {
             let root = notes_root().map_err(std::io::Error::other)?;
             app.fs_scope().allow_directory(&root, true)?;
-            // macOS keeps the overlay title bar (native traffic lights). Linux drops the
-            // system chrome immediately. Windows must be shown first: WebView2 does not
-            // start while the window is hidden, and removing the frame before that first
-            // show leaves the window invisible after the splash closes.
-            #[cfg(target_os = "linux")]
-            if let Some(window) = app.get_webview_window("main") {
-                window.set_decorations(false).map_err(std::io::Error::other)?;
-            }
+            // macOS draws the traffic lights over the tab header. Windows and Linux keep
+            // the system title bar, so their native close buttons stay in place.
+            // Windows must be shown first: WebView2 does not start while the window is hidden.
             #[cfg(target_os = "windows")]
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.show();
@@ -1262,6 +1293,7 @@ pub fn run() {
             set_workspace,
             create_workspace,
             update_workspace,
+            delete_workspace,
             notes_directory,
             read_note,
             create_note,

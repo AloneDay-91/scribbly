@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronLeft, ChevronRight, Images, Library, Minus, Plus, Search, Square, X } from "lucide-react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, Images, Library, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
-import { isMac, isTauri, modKey } from "@/lib/platform";
+import { isMac, modKey } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 
 export type TitleTab = {
@@ -98,7 +97,6 @@ export function TitleBar({
           <TooltipContent>Nouvel onglet · {modKey}T</TooltipContent>
         </Tooltip>
       </div>
-      {isTauri() && !isMac ? <WindowControls /> : null}
     </header>
   );
 }
@@ -185,66 +183,11 @@ function TabButton({
         variant="ghost"
         aria-label={`Fermer ${tab.title}`}
         className={cn(
-          "absolute top-0.5 right-0.5 z-10",
+          "absolute top-1/2 right-0.5 z-10 -translate-y-1/2",
           tab.active || tab.dirty ? undefined : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
         )}
         onClick={() => onClose(tab.id)}
       >
-        <X />
-      </Button>
-    </div>
-  );
-}
-
-function WindowControls() {
-  const [maximized, setMaximized] = useState(false);
-
-  useEffect(() => {
-    let disposed = false;
-    let unlisten: (() => void) | undefined;
-    const win = getCurrentWindow();
-    win
-      .isMaximized()
-      .then((value) => {
-        if (!disposed) {
-          setMaximized(value);
-        }
-      })
-      .catch(() => undefined);
-    win
-      .onResized(() => {
-        win.isMaximized().then(setMaximized).catch(() => undefined);
-      })
-      .then((fn) => {
-        if (disposed) {
-          fn();
-        } else {
-          unlisten = fn;
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      disposed = true;
-      unlisten?.();
-    };
-  }, []);
-
-  const win = getCurrentWindow();
-
-  return (
-    <div className="relative z-10 flex h-full shrink-0 items-center pointer-events-auto">
-      <Button size="icon" variant="ghost" aria-label="Réduire" onClick={() => void win.minimize()}>
-        <Minus />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        aria-label={maximized ? "Restaurer" : "Agrandir"}
-        onClick={() => void win.toggleMaximize()}
-      >
-        <Square />
-      </Button>
-      <Button size="icon" variant="ghost" aria-label="Fermer" onClick={() => void win.close()}>
         <X />
       </Button>
     </div>

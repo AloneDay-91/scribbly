@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   Select,
@@ -11,7 +12,7 @@ import {
 import { WorkspaceMark } from "@/components/workspace-mark";
 import { NEW_WORKSPACE, type Workspace } from "@/lib/workspaces";
 
-const FALLBACK: Workspace = { name: "Notes", path: "", icon: "logo", image: "" };
+const FALLBACK: Workspace = { name: "Notes", path: "", icon: "logo", image: "", kind: "default" };
 
 type WorkspaceSelectProps = {
   workspaces: Workspace[];
@@ -19,6 +20,7 @@ type WorkspaceSelectProps = {
   onWorkspaceChange: (path: string) => void;
   onCreateWorkspace: () => void;
   onCustomizeWorkspace: (workspace: Workspace) => void;
+  onDeleteWorkspace: (workspace: Workspace) => void;
 };
 
 export function WorkspaceSelect({
@@ -27,6 +29,7 @@ export function WorkspaceSelect({
   onWorkspaceChange,
   onCreateWorkspace,
   onCustomizeWorkspace,
+  onDeleteWorkspace,
 }: WorkspaceSelectProps) {
   const [open, setOpen] = useState(false);
   const options = workspaces.length > 0 ? workspaces : [FALLBACK];
@@ -68,6 +71,11 @@ export function WorkspaceSelect({
           <SelectItem key={workspace.path || workspace.name} value={workspace.path}>
             <WorkspaceMark icon={workspace.icon} image={workspace.image} className="size-3.5" />
             <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
+            {workspace.kind === "default" ? (
+              <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                Par défaut
+              </Badge>
+            ) : null}
             {workspace.path ? (
               <Button
                 type="button"
@@ -84,6 +92,24 @@ export function WorkspaceSelect({
                 }}
               >
                 <Pencil className="size-3" />
+              </Button>
+            ) : null}
+            {workspace.path && workspace.kind !== "default" ? (
+              <Button
+                type="button"
+                size="icon-xs"
+                variant="ghost"
+                aria-label={`Supprimer ${workspace.name}`}
+                className="size-5"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setOpen(false);
+                  onDeleteWorkspace(workspace);
+                }}
+              >
+                <Trash2 className="size-3" />
               </Button>
             ) : null}
           </SelectItem>

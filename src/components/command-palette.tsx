@@ -3,6 +3,7 @@ import { useTheme } from "next-themes";
 import {
   CommandDialog,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -10,6 +11,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
+import { Kbd } from "@/components/ui/Kbd";
 import { folderOf, type NoteSummary } from "@/lib/notes";
 import { modKey } from "@/lib/platform";
 
@@ -139,6 +141,17 @@ export function CommandPalette({
           </CommandItem>
         </CommandGroup>
       </CommandList>
+      <CommandFooter>
+        <span className="inline-flex items-center gap-1">
+          <Kbd size="sm">↑</Kbd>
+          <Kbd size="sm">↓</Kbd>
+          Naviguer
+        </span>
+        <span className="ms-auto inline-flex items-center gap-1">
+          <Kbd size="sm">esc</Kbd>
+          Fermer
+        </span>
+      </CommandFooter>
     </CommandDialog>
   );
 }
