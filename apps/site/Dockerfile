@@ -1,8 +1,9 @@
 # Contexte de build : la racine du dépôt.
 # Dokploy : Dockerfile `apps/site/Dockerfile`, contexte `.`, port 3000.
 
-FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat
+FROM node:22.23.4-alpine3.24 AS base
+RUN apk add --no-cache libc6-compat \
+  && apk upgrade --no-cache
 WORKDIR /app
 
 FROM base AS deps
